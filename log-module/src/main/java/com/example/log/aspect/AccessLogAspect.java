@@ -1,6 +1,7 @@
 package com.example.log.aspect;
 
 import com.alibaba.fastjson.JSON;
+import com.example.common.util.JwtUtil;
 import com.example.log.entity.AccessLog;
 import com.example.log.service.AccessLogService;
 import org.aspectj.lang.JoinPoint;
@@ -28,6 +29,9 @@ public class AccessLogAspect {
     
     @Autowired
     private AccessLogService accessLogService;
+    
+    @Autowired
+    private JwtUtil jwtUtil;
     
     /**
      * 定义切点：拦截所有Controller方法
@@ -92,7 +96,7 @@ public class AccessLogAspect {
         accessLog.setRequestUrl(request.getRequestURL().toString());
         accessLog.setRequestTime(LocalDateTime.now());
         
-        // 获取用户信息（从请求头中获取，由Gateway或其他模块设置）
+        // 获取用户信息（优先从请求头获取，其次从JWT token解析）
         String userIdHeader = request.getHeader("X-User-Id");
         String usernameHeader = request.getHeader("X-Username");
         
@@ -106,6 +110,23 @@ public class AccessLogAspect {
         
         if (usernameHeader != null && !usernameHeader.isEmpty()) {
             accessLog.setUsername(usernameHeader);
+        }
+        
+        // 如果请求头中没有用户信息，尝试从JWT token中解析
+        if (accessLog.getUserId() == null) {
+            String authHeader = request.getHeader("Authorization");
+            if (authHeader != null && authHeader.startsWith("Bearer ")) {
+                try {
+                    String token = authHeader.substring(7);
+                    Long userId = jwtUtil.getUserIdFromToken(token);
+                    String username = jwtUtil.getUsernameFromToken(token);
+                    
+                    accessLog.setUserId(userId);
+                    accessLog.setUsername(username);
+                } catch (Exception e) {
+                    // 忽略JWT解析错误
+                }
+            }
         }
         
         // 获取请求参数

@@ -119,7 +119,7 @@ public class AccessLogService {
     /**
      * 获取访问量统计
      */
-    public List<Map<String, Object>> getAccessStatistics(LocalDateTime startTime) {
+    public List<Object> getAccessStatistics(LocalDateTime startTime) {
         List<Object[]> results = accessLogRepository.getAccessStatistics(startTime);
         return results.stream()
                 .map(result -> {
@@ -128,6 +128,9 @@ public class AccessLogService {
                     map.put("count", result[1]);
                     return map;
                 })
+                .collect(java.util.stream.Collectors.toList())
+                .stream()
+                .map(item -> (Object) item)
                 .collect(java.util.stream.Collectors.toList());
     }
     

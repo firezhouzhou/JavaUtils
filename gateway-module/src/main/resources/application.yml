@@ -38,6 +38,10 @@ spring:
           uri: http://localhost:8084
           predicates:
             - Path=/admin/**
+        - id: log-service
+          uri: http://localhost:8085
+          predicates:
+            - Path=/log/**
 
 # JWT配置
 jwt:

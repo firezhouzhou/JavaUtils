@@ -9,6 +9,7 @@
 | user-module | user-service | 8082 | 用户管理服务 |
 | file-module | file-service | 8083 | 文件上传下载服务 |
 | admin-module | admin-service | 8084 | 系统管理服务 |
+| log-module | log-service | 8085 | 日志收集和查询服务 |
 
 ## 启动方式
 
@@ -39,6 +40,7 @@ mvn spring-boot:run
 - **用户服务**: http://localhost:8082  
 - **文件服务**: http://localhost:8083
 - **管理服务**: http://localhost:8084
+- **日志服务**: http://localhost:8085
 
 ## API文档访问
 
@@ -50,6 +52,7 @@ mvn spring-boot:run
 - http://localhost:8082/swagger-ui/index.html (用户服务)
 - http://localhost:8083/swagger-ui/index.html (文件服务)
 - http://localhost:8084/swagger-ui/index.html (管理服务)
+- http://localhost:8085/swagger-ui/index.html (日志服务)
 
 ## 网关路由配置
 
@@ -59,6 +62,7 @@ mvn spring-boot:run
 - `/user/**` → user-service (8082)
 - `/file/**` → file-service (8083)
 - `/admin/**` → admin-service (8084)
+- `/log/**` → log-service (8085)
 
 ## 注意事项
 

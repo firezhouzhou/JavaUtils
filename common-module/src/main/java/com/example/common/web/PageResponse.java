@@ -2,6 +2,7 @@ package com.example.common.web;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import org.springframework.data.domain.Page;
 
 import java.io.Serializable;
 import java.util.List;
@@ -35,6 +36,17 @@ public class PageResponse<T> implements Serializable {
         this.total = total;
         this.records = records;
         this.pages = (total + size - 1) / size;
+    }
+    
+    /**
+     * 从Spring Data Page对象构造PageResponse
+     */
+    public PageResponse(Page<T> page) {
+        this.current = (long) page.getNumber();
+        this.size = (long) page.getSize();
+        this.total = page.getTotalElements();
+        this.records = page.getContent();
+        this.pages = (long) page.getTotalPages();
     }
     
     // Getters and Setters

@@ -64,6 +64,9 @@ case "$1" in
     "admin")
         start_service "admin-module" "8084"
         ;;
+    "log")
+        start_service "log-module" "8085"
+        ;;
     "all")
         start_all
         ;;
@@ -71,9 +74,10 @@ case "$1" in
         stop_all
         ;;
     *)
-        echo "使用方法: $0 {gateway|auth|user|file|admin|all|stop}"
+        echo "使用方法: $0 {gateway|auth|user|file|admin|log|all|stop}"
         echo "示例："
         echo "  $0 gateway  # 启动网关服务"
+        echo "  $0 log      # 启动日志服务"
         echo "  $0 all      # 启动所有服务"
         echo "  $0 stop     # 停止所有服务"
         exit 1

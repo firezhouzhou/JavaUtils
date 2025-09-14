@@ -1,5 +1,7 @@
 package com.example.log.controller;
 
+import com.example.common.web.ApiResponse;
+import com.example.common.web.PageResponse;
 import com.example.log.entity.AccessLog;
 import com.example.log.service.AccessLogService;
 import io.swagger.annotations.Api;
@@ -8,11 +10,9 @@ import io.swagger.annotations.ApiParam;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -32,23 +32,15 @@ public class AccessLogController {
      */
     @GetMapping("/user/{userId}")
     @ApiOperation("根据用户ID查询访问日志")
-    public ResponseEntity<Map<String, Object>> getAccessLogsByUserId(
+    public ApiResponse<PageResponse<AccessLog>> getAccessLogsByUserId(
             @ApiParam("用户ID") @PathVariable Long userId,
             @ApiParam("页码") @RequestParam(defaultValue = "0") int page,
             @ApiParam("每页大小") @RequestParam(defaultValue = "10") int size) {
         
         Page<AccessLog> logs = accessLogService.getAccessLogsByUserId(userId, page, size);
+        PageResponse<AccessLog> pageResponse = new PageResponse<AccessLog>(logs);
         
-        Map<String, Object> result = new HashMap<>();
-        result.put("code", 200);
-        result.put("message", "查询成功");
-        result.put("data", logs.getContent());
-        result.put("total", logs.getTotalElements());
-        result.put("totalPages", logs.getTotalPages());
-        result.put("currentPage", page);
-        result.put("pageSize", size);
-        
-        return ResponseEntity.ok(result);
+        return ApiResponse.success(pageResponse);
     }
     
     /**
@@ -56,7 +48,7 @@ public class AccessLogController {
      */
     @GetMapping("/user/{userId}/range")
     @ApiOperation("根据用户ID和时间范围查询访问日志")
-    public ResponseEntity<Map<String, Object>> getAccessLogsByUserIdAndTimeRange(
+    public ApiResponse<PageResponse<AccessLog>> getAccessLogsByUserIdAndTimeRange(
             @ApiParam("用户ID") @PathVariable Long userId,
             @ApiParam("开始时间") @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime startTime,
             @ApiParam("结束时间") @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime endTime,
@@ -64,17 +56,9 @@ public class AccessLogController {
             @ApiParam("每页大小") @RequestParam(defaultValue = "10") int size) {
         
         Page<AccessLog> logs = accessLogService.getAccessLogsByUserIdAndTimeRange(userId, startTime, endTime, page, size);
+        PageResponse<AccessLog> pageResponse = new PageResponse<AccessLog>(logs);
         
-        Map<String, Object> result = new HashMap<>();
-        result.put("code", 200);
-        result.put("message", "查询成功");
-        result.put("data", logs.getContent());
-        result.put("total", logs.getTotalElements());
-        result.put("totalPages", logs.getTotalPages());
-        result.put("currentPage", page);
-        result.put("pageSize", size);
-        
-        return ResponseEntity.ok(result);
+        return ApiResponse.success(pageResponse);
     }
     
     /**
@@ -82,20 +66,15 @@ public class AccessLogController {
      */
     @GetMapping("/ip/{ipAddress}")
     @ApiOperation("根据IP地址查询访问日志")
-    public ResponseEntity<Map<String, Object>> getAccessLogsByIpAddress(
+    public ApiResponse<PageResponse<AccessLog>> getAccessLogsByIpAddress(
             @ApiParam("IP地址") @PathVariable String ipAddress,
             @ApiParam("页码") @RequestParam(defaultValue = "0") int page,
             @ApiParam("每页大小") @RequestParam(defaultValue = "10") int size) {
         
         Page<AccessLog> logs = accessLogService.getAccessLogsByIpAddress(ipAddress, page, size);
+        PageResponse<AccessLog> pageResponse = new PageResponse<AccessLog>(logs);
         
-        Map<String, Object> result = new HashMap<>();
-        result.put("code", 200);
-        result.put("message", "查询成功");
-        result.put("data", logs.getContent());
-        result.put("total", logs.getTotalElements());
-        
-        return ResponseEntity.ok(result);
+        return ApiResponse.success(pageResponse);
     }
     
     /**
@@ -103,20 +82,15 @@ public class AccessLogController {
      */
     @GetMapping("/url")
     @ApiOperation("根据请求URL模糊查询")
-    public ResponseEntity<Map<String, Object>> getAccessLogsByUrl(
+    public ApiResponse<PageResponse<AccessLog>> getAccessLogsByUrl(
             @ApiParam("请求URL") @RequestParam String url,
             @ApiParam("页码") @RequestParam(defaultValue = "0") int page,
             @ApiParam("每页大小") @RequestParam(defaultValue = "10") int size) {
         
         Page<AccessLog> logs = accessLogService.getAccessLogsByUrl(url, page, size);
+        PageResponse<AccessLog> pageResponse = new PageResponse<AccessLog>(logs);
         
-        Map<String, Object> result = new HashMap<>();
-        result.put("code", 200);
-        result.put("message", "查询成功");
-        result.put("data", logs.getContent());
-        result.put("total", logs.getTotalElements());
-        
-        return ResponseEntity.ok(result);
+        return ApiResponse.success(pageResponse);
     }
     
     /**
@@ -124,19 +98,14 @@ public class AccessLogController {
      */
     @GetMapping("/exceptions")
     @ApiOperation("查询异常日志")
-    public ResponseEntity<Map<String, Object>> getExceptionLogs(
+    public ApiResponse<PageResponse<AccessLog>> getExceptionLogs(
             @ApiParam("页码") @RequestParam(defaultValue = "0") int page,
             @ApiParam("每页大小") @RequestParam(defaultValue = "10") int size) {
         
         Page<AccessLog> logs = accessLogService.getExceptionLogs(page, size);
+        PageResponse<AccessLog> pageResponse = new PageResponse<AccessLog>(logs);
         
-        Map<String, Object> result = new HashMap<>();
-        result.put("code", 200);
-        result.put("message", "查询成功");
-        result.put("data", logs.getContent());
-        result.put("total", logs.getTotalElements());
-        
-        return ResponseEntity.ok(result);
+        return ApiResponse.success(pageResponse);
     }
     
     /**
@@ -144,22 +113,14 @@ public class AccessLogController {
      */
     @GetMapping("/all")
     @ApiOperation("查询所有访问日志")
-    public ResponseEntity<Map<String, Object>> getAllAccessLogs(
+    public ApiResponse<PageResponse<AccessLog>> getAllAccessLogs(
             @ApiParam("页码") @RequestParam(defaultValue = "0") int page,
             @ApiParam("每页大小") @RequestParam(defaultValue = "10") int size) {
         
         Page<AccessLog> logs = accessLogService.getAllAccessLogs(page, size);
+        PageResponse<AccessLog> pageResponse = new PageResponse<AccessLog>(logs);
         
-        Map<String, Object> result = new HashMap<>();
-        result.put("code", 200);
-        result.put("message", "查询成功");
-        result.put("data", logs.getContent());
-        result.put("total", logs.getTotalElements());
-        result.put("totalPages", logs.getTotalPages());
-        result.put("currentPage", page);
-        result.put("pageSize", size);
-        
-        return ResponseEntity.ok(result);
+        return ApiResponse.success(pageResponse);
     }
     
     /**
@@ -167,23 +128,16 @@ public class AccessLogController {
      */
     @GetMapping("/{id}")
     @ApiOperation("获取访问日志详情")
-    public ResponseEntity<Map<String, Object>> getAccessLogById(
+    public ApiResponse<AccessLog> getAccessLogById(
             @ApiParam("日志ID") @PathVariable Long id) {
         
         AccessLog log = accessLogService.getAccessLogById(id);
         
-        Map<String, Object> result = new HashMap<>();
         if (log != null) {
-            result.put("code", 200);
-            result.put("message", "查询成功");
-            result.put("data", log);
+            return ApiResponse.success(log);
         } else {
-            result.put("code", 404);
-            result.put("message", "日志不存在");
-            result.put("data", null);
+            return ApiResponse.error(404, "日志不存在");
         }
-        
-        return ResponseEntity.ok(result);
     }
     
     /**
@@ -191,17 +145,11 @@ public class AccessLogController {
      */
     @GetMapping("/statistics/access")
     @ApiOperation("获取访问量统计")
-    public ResponseEntity<Map<String, Object>> getAccessStatistics(
+    public ApiResponse<List<Object>> getAccessStatistics(
             @ApiParam("开始时间") @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime startTime) {
         
-        List<Map<String, Object>> statistics = accessLogService.getAccessStatistics(startTime);
-        
-        Map<String, Object> result = new HashMap<>();
-        result.put("code", 200);
-        result.put("message", "查询成功");
-        result.put("data", statistics);
-        
-        return ResponseEntity.ok(result);
+        List<Object> statistics = accessLogService.getAccessStatistics(startTime);
+        return ApiResponse.success(statistics);
     }
     
     /**
@@ -209,18 +157,12 @@ public class AccessLogController {
      */
     @GetMapping("/statistics/user")
     @ApiOperation("获取用户访问统计")
-    public ResponseEntity<Map<String, Object>> getUserAccessStatistics(
+    public ApiResponse<List<Map<String, Object>>> getUserAccessStatistics(
             @ApiParam("开始时间") @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime startTime,
             @ApiParam("限制数量") @RequestParam(defaultValue = "10") int limit) {
         
         List<Map<String, Object>> statistics = accessLogService.getUserAccessStatistics(startTime, limit);
-        
-        Map<String, Object> result = new HashMap<>();
-        result.put("code", 200);
-        result.put("message", "查询成功");
-        result.put("data", statistics);
-        
-        return ResponseEntity.ok(result);
+        return ApiResponse.success(statistics);
     }
     
     /**
@@ -228,17 +170,11 @@ public class AccessLogController {
      */
     @GetMapping("/statistics/api")
     @ApiOperation("获取接口访问统计")
-    public ResponseEntity<Map<String, Object>> getApiAccessStatistics(
+    public ApiResponse<List<Map<String, Object>>> getApiAccessStatistics(
             @ApiParam("开始时间") @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime startTime,
             @ApiParam("限制数量") @RequestParam(defaultValue = "10") int limit) {
         
         List<Map<String, Object>> statistics = accessLogService.getApiAccessStatistics(startTime, limit);
-        
-        Map<String, Object> result = new HashMap<>();
-        result.put("code", 200);
-        result.put("message", "查询成功");
-        result.put("data", statistics);
-        
-        return ResponseEntity.ok(result);
+        return ApiResponse.success(statistics);
     }
 }
