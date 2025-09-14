@@ -7,6 +7,7 @@
 # User: 8082 (用户服务)
 # File: 8083 (文件服务)
 # Admin: 8084 (管理服务)
+# Log: 8085 (日志服务)
 
 echo "Spring Boot 多模块项目启动脚本"
 echo "================================="
@@ -16,6 +17,7 @@ echo "  Auth服务:    8081"
 echo "  User服务:    8082"
 echo "  File服务:    8083"
 echo "  Admin服务:   8084"
+echo "  Log服务:     8085"
 echo "================================="
 
 function start_service() {
@@ -36,6 +38,7 @@ function start_all() {
     start_service "user-module" "8082"
     start_service "file-module" "8083"
     start_service "admin-module" "8084"
+    start_service "log-module" "8085"
     echo "所有服务启动完成！"
 }
 
