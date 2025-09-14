@@ -3,6 +3,7 @@ package com.example.gateway.filter;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cloud.gateway.filter.GatewayFilter;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.core.io.buffer.DataBuffer;
@@ -29,6 +30,7 @@ import java.util.Map;
 public class RateLimitFilter implements GatewayFilter {
     
     @Autowired
+    @Qualifier("gatewayRedisTemplate")
     private RedisTemplate<String, Object> redisTemplate;
     
     private final ObjectMapper objectMapper = new ObjectMapper();

@@ -14,7 +14,7 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
  * Gateway模块Redis配置
  */
 @Configuration
-public class RedisConfig {
+public class GatewayRedisConfig {
 
     /**
      * 配置ReactiveRedisTemplate
@@ -43,8 +43,8 @@ public class RedisConfig {
     /**
      * 配置传统的RedisTemplate (用于限流等功能)
      */
-    @Bean
-    public RedisTemplate<String, Object> redisTemplate(RedisConnectionFactory connectionFactory) {
+    @Bean("gatewayRedisTemplate")
+    public RedisTemplate<String, Object> gatewayRedisTemplate(RedisConnectionFactory connectionFactory) {
         RedisTemplate<String, Object> template = new RedisTemplate<>();
         template.setConnectionFactory(connectionFactory);
         

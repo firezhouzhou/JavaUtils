@@ -1,6 +1,6 @@
 package com.example.gateway.filter;
 
-import com.example.gateway.util.JwtUtil;
+import com.example.common.util.JwtUtil;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;

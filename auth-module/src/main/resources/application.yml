@@ -3,10 +3,15 @@ spring:
     name: auth-service
   profiles:
     active: dev
+  
+  # 导入共享配置
+  config:
+    import:
+      - "classpath:shared-config.yml"
 
-# 服务端口 - 认证服务
+# 服务端口 - 认证服务（使用统一配置，提供默认值）
 server:
-  port: 8081
+  port: ${server.config.services.auth.port}
 
 # 日志配置
 logging:

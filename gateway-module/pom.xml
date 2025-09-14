@@ -14,6 +14,19 @@
     <description>网关模块，统一入口，处理跨域、日志、限流等</description>
     
     <dependencies>
+        <!-- 依赖common-module，获得所有通用配置和依赖 -->
+        <dependency>
+            <groupId>com.example</groupId>
+            <artifactId>common-module</artifactId>
+            <exclusions>
+                <!-- 排除Spring Web MVC，因为Gateway使用WebFlux -->
+                <exclusion>
+                    <groupId>org.springframework.boot</groupId>
+                    <artifactId>spring-boot-starter-web</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        
         <!-- Spring Cloud Gateway (基于WebFlux，不能与spring-boot-starter-web一起使用) -->
         <dependency>
             <groupId>org.springframework.cloud</groupId>

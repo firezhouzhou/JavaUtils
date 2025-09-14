@@ -1,9 +1,9 @@
 spring:
   # 数据源配置 - 开发环境
   datasource:
-    url: jdbc:mysql://localhost:3306/multi_module_dev?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=true&serverTimezone=GMT%2B8
-    username: root
-    password: 19990626ZYX
+    url: ${server.config.database.url:jdbc:mysql://${server.config.database.host}:${server.config.database.port}/multi_module_dev?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=true&serverTimezone=GMT%2B8}
+    username: ${server.config.database.username}
+    password: ${server.config.database.password}
     driver-class-name: com.mysql.cj.jdbc.Driver
   mvc:
     pathmatch:
@@ -11,10 +11,10 @@ spring:
 
   # Redis配置 - 开发环境
   redis:
-    host: localhost
-    port: 6379
-    password: 
-    database: 0
+    host: ${server.config.redis.host}
+    port: ${server.config.redis.port}
+    password: ${server.config.redis.password}
+    database: ${server.config.redis.database}
 
 
 # 日志配置 - 开发环境

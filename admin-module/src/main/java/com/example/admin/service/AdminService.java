@@ -1,6 +1,7 @@
 package com.example.admin.service;
 
 import com.example.admin.controller.AdminController.*;
+import com.example.common.util.ServerConfigUtils;
 import com.example.common.web.PageResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -106,7 +107,7 @@ public class AdminService {
             LoginLog log = new LoginLog();
             log.setId((long) (page - 1) * size + i + 1);
             log.setUsername(username != null ? username : "user" + (i + 1));
-            log.setIp(ip != null ? ip : "192.168.1." + (100 + i));
+            log.setIp(ip != null ? ip : ServerConfigUtils.generateMockIp(i));
             log.setSuccess(i % 10 != 0); // 10%失败率
             log.setMessage(log.isSuccess() ? "登录成功" : "密码错误");
             log.setCreateTime(LocalDateTime.now().minusHours(i));
@@ -133,7 +134,7 @@ public class AdminService {
             log.setOperation(operations[i % operations.length]);
             log.setOperationType(operationType != null ? operationType : types[i % types.length]);
             log.setDescription("操作描述 " + (i + 1));
-            log.setIp("192.168.1." + (100 + i));
+            log.setIp(ServerConfigUtils.generateMockIp(i));
             log.setCreateTime(LocalDateTime.now().minusMinutes(i * 10));
             logs.add(log);
         }
@@ -237,7 +238,7 @@ public class AdminService {
                     OnlineUser user = new OnlineUser();
                     user.setUserId(userId);
                     user.setUsername("user" + userId);
-                    user.setIp("192.168.1.100");
+                    user.setIp(ServerConfigUtils.generateMockIp(0));
                     user.setLoginTime(LocalDateTime.now().minusHours(2));
                     user.setLastActiveTime(LocalDateTime.now().minusMinutes(5));
                     onlineUsers.add(user);

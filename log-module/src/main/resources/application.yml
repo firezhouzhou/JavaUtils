@@ -3,16 +3,21 @@ spring:
     name: log-service
   profiles:
     active: dev
+  
+  # 导入共享配置
+  config:
+    import:
+      - "classpath:shared-config.yml"
 
   # 禁用Spring Security自动配置（日志服务内网使用）
   autoconfigure:
     exclude: org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration
 
-  # 数据库配置 - 日志模块专用数据库
+  # 数据库配置 - 日志模块专用数据库（使用统一配置，提供默认值）
   datasource:
-    url: jdbc:mysql://localhost:3306/log_module?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=true&serverTimezone=GMT%2B8
-    username: root
-    password: 19990626ZYX
+    url: jdbc:mysql://${server.config.database.host}:${server.config.database.port}/log_module?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=true&serverTimezone=GMT%2B8
+    username: ${server.config.database.username}
+    password: ${server.config.database.password}
 
   # JPA配置
   jpa:
@@ -24,9 +29,9 @@ spring:
         dialect: org.hibernate.dialect.MySQL8Dialect
         format_sql: true
 
-# 服务端口 - 日志服务
+# 服务端口 - 日志服务（使用统一配置，提供默认值）
 server:
-  port: 8085
+  port: ${server.config.services.log.port}
 
 # 日志配置
 logging:

@@ -1,5 +1,6 @@
 package com.example.gateway.config;
 
+import com.example.common.util.ServerConfigUtils;
 import com.example.gateway.filter.AuthenticationFilter;
 import com.example.gateway.filter.LoggingFilter;
 import com.example.gateway.filter.RateLimitFilter;
@@ -37,7 +38,7 @@ public class GatewayConfig {
                     .stripPrefix(1)
                     .filter(loggingFilter)
                     .filter(rateLimitFilter))
-                .uri("http://localhost:8081"))
+                .uri(ServerConfigUtils.getAuthServiceUrl()))
             
             // 用户服务路由
             .route("user-service", r -> r
@@ -47,7 +48,7 @@ public class GatewayConfig {
                     .filter(authenticationFilter)
                     .filter(loggingFilter)
                     .filter(rateLimitFilter))
-                .uri("http://localhost:8082"))
+                .uri(ServerConfigUtils.getUserServiceUrl()))
             
             // 文件服务路由
             .route("file-service", r -> r
@@ -57,7 +58,7 @@ public class GatewayConfig {
                     .filter(authenticationFilter)
                     .filter(loggingFilter)
                     .filter(rateLimitFilter))
-                .uri("http://localhost:8083"))
+                .uri(ServerConfigUtils.getFileServiceUrl()))
             
             // 管理服务路由
             .route("admin-service", r -> r
@@ -67,7 +68,7 @@ public class GatewayConfig {
                     .filter(authenticationFilter)
                     .filter(loggingFilter)
                     .filter(rateLimitFilter))
-                .uri("http://localhost:8084"))
+                .uri(ServerConfigUtils.getAdminServiceUrl()))
             
             .build();
     }

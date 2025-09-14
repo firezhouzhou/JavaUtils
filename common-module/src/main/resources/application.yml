@@ -93,3 +93,43 @@ swagger:
   contact:
     name: 开发团队
     email: dev@example.com
+
+# 服务器配置 - 统一管理所有IP和端口
+server:
+  config:
+    # 数据库配置
+    database:
+      host: localhost
+      port: 3306
+      username: root
+      password: 19990626ZYX
+    
+    # Redis配置
+    redis:
+      host: localhost
+      port: 6379
+      password: ""
+      database: 0
+    
+    # 微服务配置
+    services:
+      host: localhost
+      auth:
+        port: 8081
+      user:
+        port: 8082
+      file:
+        port: 8083
+      admin:
+        port: 8084
+      log:
+        port: 8085
+    
+    # 网关配置
+    gateway:
+      port: 8080
+    
+    # 安全配置
+    security:
+      allowed-ip: 127.0.0.1
+      allowed-ips: 127.0.0.1,localhost
