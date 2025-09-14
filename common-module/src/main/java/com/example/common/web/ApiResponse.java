@@ -64,6 +64,10 @@ public class ApiResponse<T> implements Serializable {
         return new ApiResponse<>(code, message);
     }
     
+    public static <T> ApiResponse<T> error(Integer code, String message, T data) {
+        return new ApiResponse<>(code, message, data);
+    }
+    
     // Getters and Setters
     public Integer getCode() {
         return code;
