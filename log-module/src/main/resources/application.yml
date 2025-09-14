@@ -4,6 +4,10 @@ spring:
   profiles:
     active: dev
 
+  # 禁用Spring Security自动配置（日志服务内网使用）
+  autoconfigure:
+    exclude: org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration
+
   # 数据库配置 - 日志模块专用数据库
   datasource:
     url: jdbc:mysql://localhost:3306/log_module?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=true&serverTimezone=GMT%2B8
