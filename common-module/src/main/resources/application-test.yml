@@ -1,0 +1,26 @@
+spring:
+  # 数据源配置 - 测试环境
+  datasource:
+    url: jdbc:mysql://test-db:3306/multi_module_test?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=true&serverTimezone=GMT%2B8
+    username: test_user
+    password: test_pass
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  # Redis配置 - 测试环境
+  redis:
+    host: test-redis
+    port: 6379
+    password: test_redis_pass
+    database: 1
+
+# 服务端口
+server:
+  port: 8081
+
+# 日志配置 - 测试环境
+logging:
+  level:
+    root: warn
+    com.example: info
+  file:
+    name: logs/app-test.log

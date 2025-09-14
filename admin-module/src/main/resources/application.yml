@@ -1,0 +1,19 @@
+spring:
+  application:
+    name: admin-service
+  profiles:
+    active: dev
+
+# 服务端口 - 管理服务
+server:
+  port: 8084
+
+# 日志配置
+logging:
+  level:
+    com.example.admin: debug
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{50} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{50} - %msg%n"
+  file:
+    name: logs/admin-service.log

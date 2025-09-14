@@ -1,0 +1,26 @@
+spring:
+  application:
+    name: file-service
+  profiles:
+    active: dev
+
+# 服务端口 - 文件服务
+server:
+  port: 8083
+
+# 日志配置
+logging:
+  level:
+    com.example.file: debug
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{50} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{50} - %msg%n"
+  file:
+    name: logs/file-service.log
+
+# 文件上传配置
+file:
+  upload:
+    path: /tmp/uploads/
+    max-size: 10MB
+    allowed-types: jpg,jpeg,png,gif,pdf,doc,docx,xls,xlsx

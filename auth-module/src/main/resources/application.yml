@@ -1,0 +1,25 @@
+spring:
+  application:
+    name: auth-service
+  profiles:
+    active: dev
+
+# 服务端口 - 认证服务
+server:
+  port: 8081
+
+# 日志配置
+logging:
+  level:
+    com.example.auth: debug
+    org.springframework.security: debug
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{50} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{50} - %msg%n"
+  file:
+    name: logs/auth-service.log
+
+# JWT配置
+jwt:
+  secret: mySecretKey123456789012345678901234567890
+  expiration: 86400
