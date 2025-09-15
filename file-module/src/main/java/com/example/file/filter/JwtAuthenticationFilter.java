@@ -63,8 +63,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private String extractToken(HttpServletRequest request) {
         // 优先从Authorization头获取Bearer token
         String bearerToken = request.getHeader("Authorization");
-        if (StringUtils.hasText(bearerToken) && bearerToken.startsWith("Bearer ")) {
-            return bearerToken.substring(7);
+        if (StringUtils.hasText(bearerToken)) {
+            // 如果已经包含Bearer前缀，则去除
+            if (bearerToken.startsWith("Bearer ")) {
+                return bearerToken.substring(7);
+            }
+            // 如果没有Bearer前缀，直接返回（适配Swagger直接填入token的情况）
+            return bearerToken;
         }
         
         // 兼容JWT头（用于Swagger测试）
