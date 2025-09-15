@@ -8,6 +8,13 @@ spring:
   config:
     import:
       - "classpath:shared-config.yml"
+  
+  # 文件上传大小限制配置
+  servlet:
+    multipart:
+      max-file-size: 100MB      # 单个文件最大大小
+      max-request-size: 100MB   # 整个请求最大大小
+      enabled: true             # 启用文件上传
 
 # 服务端口 - 文件服务（使用统一配置，提供默认值）
 server:
@@ -27,5 +34,6 @@ logging:
 file:
   upload:
     path: /tmp/uploads/
-    max-size: 10MB
-    allowed-types: jpg,jpeg,png,gif,pdf,doc,docx,xls,xlsx
+    max-size: 100MB  # 增加文件大小限制
+    allowed-types: "*"  # 支持所有文件类型
+    check-file-type: false  # 关闭文件类型检查

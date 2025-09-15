@@ -3,9 +3,7 @@ package com.example.file.controller;
 import com.example.common.web.ApiResponse;
 import com.example.file.entity.FileMetadata;
 import com.example.file.service.FileService;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
@@ -37,16 +35,24 @@ public class FileController {
     
     @Autowired
     private FileService fileService;
-    
-    @ApiOperation("上传文件")
-    @PostMapping("/upload")
+
+    @ApiOperation(value = "上传文件", notes = "通过 MultipartFile 上传文件")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "file", value = "上传文件", required = true, dataType = "file", paramType = "form"),
+            @ApiImplicitParam(name = "businessType", value = "业务类型", required = false, dataType = "string", paramType = "form")
+    })
+    @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ApiResponse<FileMetadata> uploadFile(
-            @ApiParam("文件") @RequestParam("file") MultipartFile file,
-            @ApiParam("业务类型") @RequestParam(value = "businessType", defaultValue = "common") String businessType) {
+            @RequestPart("file") MultipartFile file,
+            @RequestParam(value = "businessType", defaultValue = "common") String businessType,
+            HttpServletRequest request) {
         
         try {
-            // 这里应该从JWT token或session中获取当前用户ID
-            Long userId = 1L;
+            // 从JWT认证过滤器设置的请求属性中获取用户ID
+            Long userId = (Long) request.getAttribute("userId");
+            if (userId == null) {
+                return ApiResponse.error("用户认证信息无效");
+            }
             
             FileMetadata fileMetadata = fileService.uploadFile(file, userId, businessType);
             return ApiResponse.success("上传成功", fileMetadata);

@@ -5,6 +5,7 @@ import com.example.common.web.ErrorCode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.validation.BindException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -59,6 +60,7 @@ public class GlobalExceptionHandler {
         String message = violations.isEmpty() ? "约束违反" : violations.iterator().next().getMessage();
         return ApiResponse.error(ErrorCode.PARAM_ERROR.getCode(), message);
     }
+    
     
     /**
      * 处理业务异常

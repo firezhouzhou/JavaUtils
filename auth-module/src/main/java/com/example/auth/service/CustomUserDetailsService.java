@@ -18,10 +18,13 @@ public class CustomUserDetailsService implements UserDetailsService {
         // 实际项目中需要注入UserService来查询用户信息
         
         if ("admin".equals(username)) {
+            // 使用预先生成的BCrypt密码 (admin123)
+            // 可以通过在线BCrypt生成器或以下Java代码生成：
+            // new BCryptPasswordEncoder().encode("admin123")
             return AuthUserDetails.builder()
                 .userId(1L)
                 .username("admin")
-                .password("$2a$10$7JB720yubVSQLvm9zS6.VeIh6utbT/zK.rDVvIOHpuLjMELhalK4O") // admin123
+                .password("$2a$10$ztESRnI3.iwi4XYDJlN0GOJLWh5q0k8ERYQIxp0Fe.dDbBe0toTT.") // admin123
                 .enabled(true)
                 .accountNonExpired(true)
                 .accountNonLocked(true)

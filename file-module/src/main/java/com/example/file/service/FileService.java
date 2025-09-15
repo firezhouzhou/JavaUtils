@@ -40,8 +40,11 @@ public class FileService {
     @Value("${file.upload.max-size:10MB}")
     private String maxSize;
     
-    @Value("${file.upload.allowed-types:jpg,jpeg,png,gif,pdf,doc,docx,xls,xlsx}")
+    @Value("${file.upload.allowed-types:*}")
     private String allowedTypes;
+    
+    @Value("${file.upload.check-file-type:false}")
+    private boolean checkFileType;
     
     private final Tika tika = new Tika();
     
@@ -285,11 +288,13 @@ public class FileService {
             throw new RuntimeException("文件大小超过限制: " + maxSize);
         }
         
-        // 检查文件类型
-        String fileExtension = getFileExtension(file.getOriginalFilename());
-        List<String> allowedTypeList = Arrays.asList(allowedTypes.split(","));
-        if (!allowedTypeList.contains(fileExtension.toLowerCase())) {
-            throw new RuntimeException("不支持的文件类型: " + fileExtension);
+        // 检查文件类型（如果启用了文件类型检查）
+        if (checkFileType && !"*".equals(allowedTypes)) {
+            String fileExtension = getFileExtension(file.getOriginalFilename());
+            List<String> allowedTypeList = Arrays.asList(allowedTypes.split(","));
+            if (!allowedTypeList.contains(fileExtension.toLowerCase())) {
+                throw new RuntimeException("不支持的文件类型: " + fileExtension);
+            }
         }
     }
     

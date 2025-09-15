@@ -24,6 +24,11 @@
                     <groupId>org.springframework.boot</groupId>
                     <artifactId>spring-boot-starter-web</artifactId>
                 </exclusion>
+                <!-- 排除Spring Security，因为Gateway有自己的认证逻辑 -->
+                <exclusion>
+                    <groupId>org.springframework.boot</groupId>
+                    <artifactId>spring-boot-starter-security</artifactId>
+                </exclusion>
             </exclusions>
         </dependency>
         
