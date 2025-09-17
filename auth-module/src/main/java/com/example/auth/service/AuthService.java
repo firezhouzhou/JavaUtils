@@ -72,6 +72,9 @@ public class AuthService {
             // 记录登录日志
             recordLoginLog(userId, username, clientIp, true, "登录成功");
             
+            // 更新用户登录信息
+            userDetailsService.updateLoginInfo(username);
+            
             Map<String, Object> result = new HashMap<>();
             result.put("accessToken", accessToken);
             result.put("refreshToken", refreshToken);
@@ -96,48 +99,75 @@ public class AuthService {
      * 刷新Token
      */
     public Map<String, Object> refreshToken(String refreshToken) {
-        // 去掉Bearer前缀
-        if (refreshToken.startsWith("Bearer ")) {
-            refreshToken = refreshToken.substring(7);
-        }
-        
-        // 检查token是否在黑名单中
-        if (isTokenBlacklisted(refreshToken)) {
-            throw new RuntimeException("Token已失效");
-        }
-        
-        String username = jwtUtil.getUsernameFromToken(refreshToken);
-        Long userId = jwtUtil.getUserIdFromToken(refreshToken);
-        
-        if (username != null && !jwtUtil.isTokenExpired(refreshToken)) {
-            // 验证refresh token缓存
-            Long cachedUserId = getCachedRefreshToken(refreshToken);
-            if (cachedUserId == null || !cachedUserId.equals(userId)) {
-                throw new RuntimeException("Refresh token无效");
+        try {
+            // 输入验证
+            if (refreshToken == null || refreshToken.trim().isEmpty()) {
+                throw new RuntimeException("Refresh token不能为空");
             }
             
-            // 生成新的access token
-            String newAccessToken = jwtUtil.generateToken(username, userId);
-            String newRefreshToken = jwtUtil.generateRefreshToken(username, userId);
+            // 去掉Bearer前缀（如果存在）
+            if (refreshToken.startsWith("Bearer ")) {
+                refreshToken = refreshToken.substring(7);
+            }
             
-            // 将旧的refresh token加入黑名单
-            addTokenToBlacklist(refreshToken);
+            // 再次检查token格式
+            if (refreshToken == null || refreshToken.trim().isEmpty()) {
+                throw new RuntimeException("Refresh token格式无效");
+            }
             
-            // 缓存新的token
-            cacheLoginStatus(newAccessToken, userId, 86400);
-            cacheRefreshToken(newRefreshToken, userId, 604800);
+            // 检查JWT格式（应该包含两个点）
+            String[] tokenParts = refreshToken.split("\\.");
+            if (tokenParts.length != 3) {
+                throw new RuntimeException("Refresh token格式无效，不是有效的JWT。当前格式: " + tokenParts.length + " 部分，应为3部分");
+            }
             
-            Map<String, Object> result = new HashMap<>();
-            result.put("accessToken", newAccessToken);
-            result.put("refreshToken", newRefreshToken);
-            result.put("tokenType", "Bearer");
-            result.put("expiresIn", 86400);
-            result.put("refreshExpiresIn", 604800);
+            // 检查token是否在黑名单中
+            if (isTokenBlacklisted(refreshToken)) {
+                throw new RuntimeException("Token已失效");
+            }
             
-            return result;
+            String username = jwtUtil.getUsernameFromToken(refreshToken);
+            Long userId = jwtUtil.getUserIdFromToken(refreshToken);
+            
+            if (username != null && !jwtUtil.isTokenExpired(refreshToken)) {
+                // 验证refresh token缓存
+                Long cachedUserId = getCachedRefreshToken(refreshToken);
+                if (cachedUserId == null || !cachedUserId.equals(userId)) {
+                    throw new RuntimeException("Refresh token无效");
+                }
+                
+                // 生成新的access token
+                String newAccessToken = jwtUtil.generateToken(username, userId);
+                String newRefreshToken = jwtUtil.generateRefreshToken(username, userId);
+                
+                // 将旧的refresh token加入黑名单
+                addTokenToBlacklist(refreshToken);
+                
+                // 缓存新的token
+                cacheLoginStatus(newAccessToken, userId, 86400);
+                cacheRefreshToken(newRefreshToken, userId, 604800);
+                
+                Map<String, Object> result = new HashMap<>();
+                result.put("accessToken", newAccessToken);
+                result.put("refreshToken", newRefreshToken);
+                result.put("tokenType", "Bearer");
+                result.put("expiresIn", 86400);
+                result.put("refreshExpiresIn", 604800);
+                
+                return result;
+            }
+            
+            throw new RuntimeException("Refresh token无效或已过期");
+            
+        } catch (io.jsonwebtoken.MalformedJwtException e) {
+            throw new RuntimeException("Refresh token格式错误: " + e.getMessage());
+        } catch (io.jsonwebtoken.ExpiredJwtException e) {
+            throw new RuntimeException("Refresh token已过期");
+        } catch (io.jsonwebtoken.SignatureException e) {
+            throw new RuntimeException("Refresh token签名无效");
+        } catch (Exception e) {
+            throw new RuntimeException("刷新token失败: " + e.getMessage());
         }
-        
-        throw new RuntimeException("Refresh token无效或已过期");
     }
     
     /**

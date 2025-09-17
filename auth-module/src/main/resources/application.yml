@@ -8,6 +8,47 @@ spring:
   config:
     import:
       - "classpath:shared-config.yml"
+  
+  # 数据源配置
+  datasource:
+    url: jdbc:mysql://${server.config.database.host}:${server.config.database.port}/multi_module_dev?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=true&serverTimezone=GMT%2B8
+    username: ${server.config.database.username}
+    password: ${server.config.database.password}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    
+    # 连接池配置
+    hikari:
+      maximum-pool-size: 20
+      minimum-idle: 5
+      idle-timeout: 300000
+      connection-timeout: 20000
+      max-lifetime: 1200000
+      pool-name: AuthServiceHikariCP
+  
+  # JPA配置
+  jpa:
+    hibernate:
+      ddl-auto: update  # 自动创建/更新表结构
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQL8Dialect
+        format_sql: true
+    database-platform: org.hibernate.dialect.MySQL8Dialect
+  
+  # Redis配置
+  redis:
+    host: ${server.config.redis.host}
+    port: ${server.config.redis.port}
+    password: ${server.config.redis.password}
+    database: ${server.config.redis.database}
+    timeout: 2000ms
+    lettuce:
+      pool:
+        max-active: 8
+        max-wait: -1ms
+        max-idle: 8
+        min-idle: 0
 
 # 服务端口 - 认证服务（使用统一配置，提供默认值）
 server:

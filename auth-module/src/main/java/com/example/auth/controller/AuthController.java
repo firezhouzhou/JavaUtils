@@ -1,6 +1,7 @@
 package com.example.auth.controller;
 
 import com.example.auth.entity.AuthUserDetails;
+import com.example.auth.entity.User;
 import com.example.auth.service.AuthService;
 import com.example.auth.service.CustomUserDetailsService;
 import com.example.common.web.ApiResponse;
@@ -11,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -45,9 +47,34 @@ public class AuthController {
     
     @ApiOperation("刷新Token")
     @PostMapping("/refresh")
-    public ApiResponse<Map<String, Object>> refresh(@RequestHeader("Authorization") String token) {
-        Map<String, Object> result = authService.refreshToken(token);
-        return ApiResponse.success("刷新成功", result);
+    public ApiResponse<Map<String, Object>> refresh(@RequestHeader(value = "Authorization", required = false) String authHeader,
+                                                   @RequestHeader(value = "JWT", required = false) String jwtHeader,
+                                                   @RequestBody(required = false) RefreshTokenRequest request) {
+        String token = null;
+        
+        // 优先从Authorization header获取token
+        if (authHeader != null && !authHeader.trim().isEmpty()) {
+            token = authHeader;
+        }
+        // 其次从JWT header获取token
+        else if (jwtHeader != null && !jwtHeader.trim().isEmpty()) {
+            token = jwtHeader;
+        }
+        // 最后从请求体获取
+        else if (request != null && request.getRefreshToken() != null && !request.getRefreshToken().trim().isEmpty()) {
+            token = request.getRefreshToken();
+        }
+        
+        if (token == null || token.trim().isEmpty()) {
+            return ApiResponse.error(400, "请提供refresh token");
+        }
+        
+        try {
+            Map<String, Object> result = authService.refreshToken(token);
+            return ApiResponse.success("刷新成功", result);
+        } catch (Exception e) {
+            return ApiResponse.error(400, e.getMessage());
+        }
     }
     
     @ApiOperation("退出登录")
@@ -59,8 +86,8 @@ public class AuthController {
     
     @ApiOperation("查看所有用户（调试用）")
     @GetMapping("/users")
-    public ApiResponse<Map<String, AuthUserDetails>> getAllUsers() {
-        Map<String, AuthUserDetails> users = userDetailsService.getAllUsers();
+    public ApiResponse<List<User>> getAllUsers() {
+        List<User> users = userDetailsService.getAllUsers();
         return ApiResponse.success("获取用户列表成功", users);
     }
     
@@ -140,6 +167,18 @@ public class AuthController {
         
         public void setEmail(String email) {
             this.email = email;
+        }
+    }
+    
+    public static class RefreshTokenRequest {
+        private String refreshToken;
+        
+        public String getRefreshToken() {
+            return refreshToken;
+        }
+        
+        public void setRefreshToken(String refreshToken) {
+            this.refreshToken = refreshToken;
         }
     }
 }
