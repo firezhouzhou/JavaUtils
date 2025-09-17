@@ -40,3 +40,41 @@ server:
     security:
       allowed-ip: 127.0.0.1
       allowed-ips: 127.0.0.1,localhost
+
+# Spring Security 统一配置
+app:
+  security:
+    enabled: true
+    # 无需认证的路径
+    permit-all-paths:
+      - "/swagger-ui/**"
+      - "/v3/api-docs/**"
+      - "/swagger-resources/**"
+      - "/webjars/**"
+      - "/druid/**"
+      - "/actuator/**"
+      - "/auth/login"
+      - "/auth/register"
+      - "/user/check-username"
+      - "/user/check-email"
+      - "/common/id/**"
+      - "/common/security/public"
+    # 统一用户账号配置
+    users:
+      - username: admin
+        password: admin123
+        role: ADMIN
+      - username: user
+        password: user123
+        role: USER
+      - username: developer
+        password: dev123
+        role: DEVELOPER
+
+# Spring Security 基础配置
+spring:
+  security:
+    user:
+      name: admin
+      password: admin123
+      roles: ADMIN

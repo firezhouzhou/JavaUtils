@@ -1,6 +1,8 @@
 package com.example.auth.controller;
 
+import com.example.auth.entity.AuthUserDetails;
 import com.example.auth.service.AuthService;
+import com.example.auth.service.CustomUserDetailsService;
 import com.example.common.web.ApiResponse;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -22,6 +24,9 @@ public class AuthController {
     @Autowired
     private AuthService authService;
     
+    @Autowired
+    private CustomUserDetailsService userDetailsService;
+    
     @ApiOperation("用户登录")
     @PostMapping("/login")
     public ApiResponse<Map<String, Object>> login(@Valid @RequestBody LoginRequest request, 
@@ -33,9 +38,9 @@ public class AuthController {
     
     @ApiOperation("用户注册")
     @PostMapping("/register")
-    public ApiResponse<String> register(@Valid @RequestBody RegisterRequest request) {
-        authService.register(request.getUsername(), request.getPassword(), request.getEmail());
-        return ApiResponse.success("注册成功");
+    public ApiResponse<Map<String, Object>> register(@Valid @RequestBody RegisterRequest request) {
+        Map<String, Object> result = authService.register(request.getUsername(), request.getPassword(), request.getEmail());
+        return ApiResponse.success("注册成功", result);
     }
     
     @ApiOperation("刷新Token")
@@ -50,6 +55,13 @@ public class AuthController {
     public ApiResponse<String> logout(@RequestHeader("Authorization") String token) {
         authService.logout(token);
         return ApiResponse.success("退出成功");
+    }
+    
+    @ApiOperation("查看所有用户（调试用）")
+    @GetMapping("/users")
+    public ApiResponse<Map<String, AuthUserDetails>> getAllUsers() {
+        Map<String, AuthUserDetails> users = userDetailsService.getAllUsers();
+        return ApiResponse.success("获取用户列表成功", users);
     }
     
     /**

@@ -178,26 +178,28 @@ public class AuthService {
     /**
      * 用户注册
      */
-    public void register(String username, String password, String email) {
-        // 检查用户名是否已存在
+    public Map<String, Object> register(String username, String password, String email) {
         try {
-            UserDetails existingUser = userDetailsService.loadUserByUsername(username);
-            if (existingUser != null) {
-                throw new RuntimeException("用户名已存在");
-            }
-        } catch (org.springframework.security.core.userdetails.UsernameNotFoundException e) {
-            // 用户不存在，可以注册
+            // 调用用户详情服务进行注册
+            AuthUserDetails newUser = userDetailsService.registerUser(username, password, email);
+            
+            // 记录注册日志
+            recordRegistrationLog(newUser.getUserId(), username, email, true, "注册成功");
+            
+            // 返回注册结果
+            Map<String, Object> result = new HashMap<>();
+            result.put("userId", newUser.getUserId());
+            result.put("username", newUser.getUsername());
+            result.put("message", "注册成功");
+            result.put("timestamp", System.currentTimeMillis());
+            
+            return result;
+            
+        } catch (RuntimeException e) {
+            // 记录注册失败日志
+            recordRegistrationLog(null, username, email, false, e.getMessage());
+            throw e;
         }
-        
-        // 这里应该调用用户服务进行注册
-        // 由于是认证模块，我们只做基本的验证，实际的用户创建应该通过用户服务
-        // 为了演示，这里只是记录日志
-        System.out.println("用户注册请求 - 用户名: " + username + ", 邮箱: " + email);
-        
-        // 实际项目中应该：
-        // 1. 调用用户服务的注册接口
-        // 2. 发送验证邮件
-        // 3. 记录注册日志
     }
     
     /**
@@ -288,6 +290,16 @@ public class AuthService {
         // 这里可以记录到数据库或日志文件
         String logMessage = String.format("用户登录 - 用户ID: %s, 用户名: %s, IP: %s, 成功: %s, 消息: %s, 时间: %s",
             userId, username, clientIp, success, message, LocalDateTime.now());
+        System.out.println(logMessage);
+    }
+    
+    /**
+     * 记录注册日志
+     */
+    private void recordRegistrationLog(Long userId, String username, String email, boolean success, String message) {
+        // 这里可以记录到数据库或日志文件
+        String logMessage = String.format("用户注册 - 用户ID: %s, 用户名: %s, 邮箱: %s, 成功: %s, 消息: %s, 时间: %s",
+            userId, username, email, success, message, LocalDateTime.now());
         System.out.println(logMessage);
     }
 }
