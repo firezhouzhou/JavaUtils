@@ -64,11 +64,15 @@ public class AuthController {
     @ApiOperation("刷新Token")
     @PostMapping("/refresh")
     public ApiResponse<Map<String, Object>> refresh(@RequestHeader(value = "Authorization", required = false) String authHeader,
+                                                    @RequestHeader(value = "Bearer", required = false) String bearerHeader,
                                                    @RequestBody(required = false) RefreshTokenRequest request) {
         String token = null;
-        
-        // 优先从Authorization header获取token (标准方式)
-        if (authHeader != null && !authHeader.trim().isEmpty()) {
+        if (bearerHeader != null && !bearerHeader.trim().isEmpty()) {
+            // 优先使用Bearer头中的token（Swagger当前发送的）
+            token = bearerHeader;
+            System.out.println("Using token from Bearer header");
+        } else if (authHeader != null && !authHeader.trim().isEmpty()) {
+            // 如果Bearer头没有，使用Authorization头中的Bearer token
             token = authHeader;
         } else if (request != null && request.getRefreshToken() != null && !request.getRefreshToken().trim().isEmpty()) {
             // 如果header中没有，从请求体获取 (备用方式)
