@@ -45,36 +45,52 @@ public class AuthService {
      * 用户登录
      */
     public Map<String, Object> login(String username, String password, String clientIp) {
-        // 检查登录尝试次数
-        checkLoginAttempts(username, clientIp);
+        System.out.println("=== AuthService.login START ===");
+        System.out.println("Login attempt - Username: " + username + ", IP: " + clientIp);
         
         try {
+            // 检查登录尝试次数
+            System.out.println("Checking login attempts for user: " + username);
+            checkLoginAttempts(username, clientIp);
+            System.out.println("Login attempts check passed");
+
             // 认证用户
+            System.out.println("Authenticating user with AuthenticationManager...");
             Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(username, password)
+                    new UsernamePasswordAuthenticationToken(username, password)
             );
-            
+            System.out.println("Authentication successful");
+
             // 获取用户详情
             AuthUserDetails userDetails = (AuthUserDetails) authentication.getPrincipal();
             Long userId = userDetails.getUserId();
-            
+            System.out.println("User details retrieved - UserId: " + userId + ", Username: " + userDetails.getUsername());
+
             // 生成JWT token
+            System.out.println("Generating JWT tokens...");
             String accessToken = jwtUtil.generateToken(username, userId);
             String refreshToken = jwtUtil.generateRefreshToken(username, userId);
-            
+            System.out.println("JWT tokens generated successfully");
+            System.out.println("Access token length: " + accessToken.length());
+            System.out.println("Refresh token length: " + refreshToken.length());
+
             // 缓存登录状态
+            System.out.println("Caching login status and refresh token...");
             cacheLoginStatus(accessToken, userId, 86400); // 24小时
             cacheRefreshToken(refreshToken, userId, 604800); // 7天
-            
+            System.out.println("Login status cached successfully");
+
             // 清除登录失败记录
             clearLoginAttempts(username, clientIp);
-            
+
             // 记录登录日志
             recordLoginLog(userId, username, clientIp, true, "登录成功");
-            
+
             // 更新用户登录信息
+            System.out.println("Updating user login info...");
             userDetailsService.updateLoginInfo(username);
-            
+            System.out.println("User login info updated");
+
             Map<String, Object> result = new HashMap<>();
             result.put("accessToken", accessToken);
             result.put("refreshToken", refreshToken);
@@ -84,14 +100,27 @@ public class AuthService {
             result.put("userId", userId);
             result.put("username", username);
             result.put("authorities", userDetails.getAuthorities());
-            
+
+            System.out.println("Login result prepared successfully");
+            System.out.println("=== AuthService.login SUCCESS ===");
             return result;
-            
+
         } catch (AuthenticationException e) {
+            System.err.println("Authentication failed for user: " + username);
+            System.err.println("Authentication error: " + e.getClass().getSimpleName() + " - " + e.getMessage());
+            
             // 记录登录失败
             recordLoginAttempt(username, clientIp);
             recordLoginLog(null, username, clientIp, false, e.getMessage());
+            
+            System.out.println("=== AuthService.login FAILED ===");
             throw new BadCredentialsException("用户名或密码错误");
+        } catch (Exception e) {
+            System.err.println("Unexpected error during login for user: " + username);
+            System.err.println("Error: " + e.getClass().getSimpleName() + " - " + e.getMessage());
+            e.printStackTrace();
+            System.out.println("=== AuthService.login ERROR ===");
+            throw e;
         }
     }
     
@@ -174,17 +203,66 @@ public class AuthService {
      * 退出登录
      */
     public void logout(String token) {
-        if (token.startsWith("Bearer ")) {
-            token = token.substring(7);
-        }
+        System.out.println("=== AuthService.logout START ===");
+        System.out.println("Logout token received: " + (token != null ? token.substring(0, Math.min(token.length(), 50)) + "..." : "null"));
         
-        // 将token加入黑名单
-        addTokenToBlacklist(token);
-        
-        // 清除登录状态缓存
-        Long userId = jwtUtil.getUserIdFromToken(token);
-        if (userId != null) {
-            clearLoginStatus(token);
+        try {
+            // 处理Bearer前缀
+            String originalToken = token;
+            if (token != null && token.startsWith("Bearer ")) {
+                token = token.substring(7);
+                System.out.println("Removed Bearer prefix, token length now: " + token.length());
+            } else {
+                System.out.println("No Bearer prefix found, token length: " + (token != null ? token.length() : 0));
+            }
+            
+            // 验证token格式
+            if (token == null || token.trim().isEmpty()) {
+                System.err.println("Token is null or empty after processing");
+                throw new RuntimeException("Token is null or empty");
+            }
+            
+            // 检查JWT格式
+            String[] tokenParts = token.split("\\.");
+            System.out.println("Token parts count: " + tokenParts.length);
+            if (tokenParts.length != 3) {
+                System.err.println("Invalid JWT format - expected 3 parts, got " + tokenParts.length);
+                System.err.println("Token: " + token);
+                throw new RuntimeException("Invalid JWT format");
+            }
+            
+            System.out.println("Token format validation passed");
+            
+            // 将token加入黑名单
+            System.out.println("Adding token to blacklist...");
+            addTokenToBlacklist(token);
+            System.out.println("Token added to blacklist successfully");
+            
+            // 清除登录状态缓存
+            System.out.println("Clearing login status cache...");
+            try {
+                Long userId = jwtUtil.getUserIdFromToken(token);
+                System.out.println("Retrieved userId from token: " + userId);
+                if (userId != null) {
+                    clearLoginStatus(token);
+                    System.out.println("Login status cleared successfully");
+                } else {
+                    System.out.println("UserId is null, skipping login status clear");
+                }
+            } catch (Exception e) {
+                System.err.println("Failed to get userId from token during logout: " + e.getMessage());
+                e.printStackTrace();
+                // 继续执行，不影响logout流程
+            }
+            
+            System.out.println("=== AuthService.logout SUCCESS ===");
+            
+        } catch (Exception e) {
+            System.err.println("Logout failed");
+            System.err.println("Logout error: " + e.getClass().getSimpleName() + " - " + e.getMessage());
+            e.printStackTrace();
+            System.out.println("=== AuthService.logout FAILED ===");
+            throw e;
         }
     }
     
@@ -284,7 +362,26 @@ public class AuthService {
      */
     private Long getCachedRefreshToken(String refreshToken) {
         String cacheKey = "refresh:" + refreshToken;
-        return (Long) redisTemplate.opsForValue().get(cacheKey);
+        Object cachedValue = redisTemplate.opsForValue().get(cacheKey);
+        if (cachedValue == null) {
+            return null;
+        }
+        
+        // 处理不同的数值类型
+        if (cachedValue instanceof Long) {
+            return (Long) cachedValue;
+        } else if (cachedValue instanceof Integer) {
+            return ((Integer) cachedValue).longValue();
+        } else if (cachedValue instanceof Number) {
+            return ((Number) cachedValue).longValue();
+        } else {
+            // 尝试字符串转换
+            try {
+                return Long.parseLong(cachedValue.toString());
+            } catch (NumberFormatException e) {
+                return null;
+            }
+        }
     }
     
     /**
@@ -298,10 +395,27 @@ public class AuthService {
      * 将token加入黑名单
      */
     private void addTokenToBlacklist(String token) {
-        String key = TOKEN_BLACKLIST_PREFIX + token;
-        long expiration = jwtUtil.getExpirationFromToken(token).getTime() - System.currentTimeMillis();
-        if (expiration > 0) {
-            redisTemplate.opsForValue().set(key, "blacklisted", expiration, TimeUnit.MILLISECONDS);
+        try {
+            // 验证token格式
+            if (token == null || token.trim().isEmpty()) {
+                return;
+            }
+            
+            // 检查JWT格式（应该包含两个点）
+            String[] tokenParts = token.split("\\.");
+            if (tokenParts.length != 3) {
+                System.err.println("Invalid JWT format for blacklist: " + token.length() + " characters, " + tokenParts.length + " parts");
+                return;
+            }
+            
+            String key = TOKEN_BLACKLIST_PREFIX + token;
+            long expiration = jwtUtil.getExpirationFromToken(token).getTime() - System.currentTimeMillis();
+            if (expiration > 0) {
+                redisTemplate.opsForValue().set(key, "blacklisted", expiration, TimeUnit.MILLISECONDS);
+            }
+        } catch (Exception e) {
+            System.err.println("Failed to add token to blacklist: " + e.getMessage());
+            // 继续执行，不影响logout流程
         }
     }
     

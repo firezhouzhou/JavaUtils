@@ -31,11 +31,27 @@ public class AuthController {
     
     @ApiOperation("用户登录")
     @PostMapping("/login")
-    public ApiResponse<Map<String, Object>> login(@Valid @RequestBody LoginRequest request, 
-                                                HttpServletRequest httpRequest) {
-        String clientIp = getClientIp(httpRequest);
-        Map<String, Object> result = authService.login(request.getUsername(), request.getPassword(), clientIp);
-        return ApiResponse.success("登录成功", result);
+    public ApiResponse<Map<String, Object>> login(@Valid @RequestBody LoginRequest request,
+                                                  HttpServletRequest httpRequest) {
+        System.out.println("=== LOGIN REQUEST START ===");
+        System.out.println("Login request received - Username: " + request.getUsername());
+        System.out.println("Login request headers: " + java.util.Collections.list(httpRequest.getHeaderNames()));
+        
+        try {
+            String clientIp = getClientIp(httpRequest);
+            System.out.println("Client IP: " + clientIp);
+            
+            Map<String, Object> result = authService.login(request.getUsername(), request.getPassword(), clientIp);
+            System.out.println("Login successful for user: " + request.getUsername());
+            System.out.println("=== LOGIN REQUEST SUCCESS ===");
+            return ApiResponse.success("登录成功", result);
+        } catch (Exception e) {
+            System.err.println("Login failed for user: " + request.getUsername());
+            System.err.println("Login error: " + e.getClass().getSimpleName() + " - " + e.getMessage());
+            e.printStackTrace();
+            System.out.println("=== LOGIN REQUEST FAILED ===");
+            throw e;
+        }
     }
     
     @ApiOperation("用户注册")
@@ -48,25 +64,19 @@ public class AuthController {
     @ApiOperation("刷新Token")
     @PostMapping("/refresh")
     public ApiResponse<Map<String, Object>> refresh(@RequestHeader(value = "Authorization", required = false) String authHeader,
-                                                   @RequestHeader(value = "JWT", required = false) String jwtHeader,
                                                    @RequestBody(required = false) RefreshTokenRequest request) {
         String token = null;
         
-        // 优先从Authorization header获取token
+        // 优先从Authorization header获取token (标准方式)
         if (authHeader != null && !authHeader.trim().isEmpty()) {
             token = authHeader;
-        }
-        // 其次从JWT header获取token
-        else if (jwtHeader != null && !jwtHeader.trim().isEmpty()) {
-            token = jwtHeader;
-        }
-        // 最后从请求体获取
-        else if (request != null && request.getRefreshToken() != null && !request.getRefreshToken().trim().isEmpty()) {
+        } else if (request != null && request.getRefreshToken() != null && !request.getRefreshToken().trim().isEmpty()) {
+            // 如果header中没有，从请求体获取 (备用方式)
             token = request.getRefreshToken();
         }
         
         if (token == null || token.trim().isEmpty()) {
-            return ApiResponse.error(400, "请提供refresh token");
+            return ApiResponse.error(400, "请在Authorization头中提供Bearer token或在请求体中提供refreshToken");
         }
         
         try {
@@ -79,9 +89,42 @@ public class AuthController {
     
     @ApiOperation("退出登录")
     @PostMapping("/logout")
-    public ApiResponse<String> logout(@RequestHeader("Authorization") String token) {
-        authService.logout(token);
-        return ApiResponse.success("退出成功");
+    public ApiResponse<String> logout(@RequestHeader(value = "Authorization", required = false) String authHeader,
+                                     @RequestHeader(value = "Bearer", required = false) String bearerHeader,
+                                     HttpServletRequest httpRequest) {
+        System.out.println("=== LOGOUT REQUEST START ===");
+        System.out.println("Logout request received");
+        System.out.println("Authorization header: " + (authHeader != null ? authHeader.substring(0, Math.min(authHeader.length(), 50)) + "..." : "null"));
+        System.out.println("Bearer header: " + (bearerHeader != null ? bearerHeader.substring(0, Math.min(bearerHeader.length(), 50)) + "..." : "null"));
+        
+        // 确定使用哪个token
+        String token = null;
+        if (bearerHeader != null && !bearerHeader.trim().isEmpty()) {
+            // 优先使用Bearer头中的token（Swagger当前发送的）
+            token = bearerHeader;
+            System.out.println("Using token from Bearer header");
+        } else if (authHeader != null && !authHeader.trim().isEmpty() && authHeader.startsWith("Bearer ")) {
+            // 如果Bearer头没有，使用Authorization头中的Bearer token
+            token = authHeader;
+            System.out.println("Using token from Authorization header");
+        } else {
+            System.err.println("No valid token found in either Bearer or Authorization headers");
+            return ApiResponse.error(400, "请提供有效的Bearer token");
+        }
+        
+        try {
+            System.out.println("Calling authService.logout with token...");
+            authService.logout(token);
+            System.out.println("Logout successful");
+            System.out.println("=== LOGOUT REQUEST SUCCESS ===");
+            return ApiResponse.success("退出成功");
+        } catch (Exception e) {
+            System.err.println("Logout failed");
+            System.err.println("Logout error: " + e.getClass().getSimpleName() + " - " + e.getMessage());
+            e.printStackTrace();
+            System.out.println("=== LOGOUT REQUEST FAILED ===");
+            return ApiResponse.error(500, e.getMessage());
+        }
     }
     
     @ApiOperation("查看所有用户（调试用）")

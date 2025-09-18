@@ -9,6 +9,7 @@ import springfox.documentation.service.ApiInfo;
 import springfox.documentation.service.ApiKey;
 import springfox.documentation.service.AuthorizationScope;
 import springfox.documentation.service.SecurityReference;
+import springfox.documentation.service.SecurityScheme;
 import springfox.documentation.spi.DocumentationType;
 import springfox.documentation.spi.service.contexts.SecurityContext;
 import springfox.documentation.spring.web.plugins.Docket;
@@ -38,16 +39,19 @@ public class SwaggerConfig {
         return new ApiInfoBuilder()
                 .title("Spring Boot 多模块项目 API")
                 .description("Spring Boot 多模块项目接口文档\n\n" +
-                           "🔐 认证说明：\n" +
-                           "- 在右上角点击 'Authorize' 按钮\n" +
-                           "- 在JWT字段中直接输入token值（无需添加 'Bearer ' 前缀）\n" +
-                           "- 系统会自动处理Bearer格式")
+                           "🔐 Bearer Token认证说明：\n" +
+                           "1. 点击右上角 '🔒 Authorize' 按钮\n" +
+                           "2. 在Bearer字段中输入JWT token\n" +
+                           "3. 格式：直接输入token（无需Bearer前缀）\n" +
+                           "4. 示例：eyJhbGciOiJIUzI1NiJ9...\n" +
+                           "5. 点击Authorize确认\n\n" +
+                           "⚠️ 注意：请勿输入用户名密码，只输入JWT token")
                 .version("1.0.0")
                 .build();
     }
     
-    private ApiKey apiKey() {
-        return new ApiKey("JWT", "Authorization", "header");
+    private SecurityScheme apiKey() {
+        return new ApiKey("Bearer", "Authorization", "header");
     }
     
     private SecurityContext securityContext() {
@@ -61,6 +65,6 @@ public class SwaggerConfig {
         AuthorizationScope authorizationScope = new AuthorizationScope("global", "accessEverything");
         AuthorizationScope[] authorizationScopes = new AuthorizationScope[1];
         authorizationScopes[0] = authorizationScope;
-        return Arrays.asList(new SecurityReference("JWT", authorizationScopes));
+        return Arrays.asList(new SecurityReference("Bearer", authorizationScopes));
     }
 }
